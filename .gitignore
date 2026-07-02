@@ -1,0 +1,11 @@
+node_modules/
+.vercel/
+.env
+.env.local
+.env*.local
+lyv.db
+service-account.json
+luz-y-vida-46844-firebase-adminsdk-fbsvc-7f8be1b8cc.json
+*.json.bak
+app.js.bak
+models/

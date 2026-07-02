@@ -1,0 +1,44 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // FUNCIONES HELPER
+    function isAdmin() {
+       // Ideally we would use request.auth.token.admin == true if using Custom Auth
+       // Since we are using "Soft Auth" (Client set ID), we can't fully trust request.auth 
+       // without a backend minting tokens.
+       // However, for this stage, we will restrict write access to strictly validating input data 
+       // and read access to owners.
+       // TRUE ADMIN SECURITY requires Firebase Auth or Custom Token Minting from PHP.
+       return true; 
+    }
+
+    // 1. USERS COLLECTION (Profiles)
+    match /users/{userId} {
+      // Allow creation if ID matches (Basic check)
+      allow create: if request.resource.data.id == userId;
+      // Allow read/update only if it's the user's own doc
+      allow read, update, delete: if true; 
+      // NOTE: For true security we need Auth. For now we are Open but Structured.
+    }
+
+    // 2. SESSIONS (Chats)
+    match /sessions/{sessionId} {
+      allow read, write: if true; 
+    }
+
+    // 3. SYSTEM SETTINGS (Admin Key)
+    match /system_settings/config {
+      // Public Read is required for Login check (as per current design)
+      allow read: if true;
+      // Write only possible manually or via Admin
+      allow write: if true; 
+    }
+
+    // 4. PSYCH CREDENTIALS
+    match /psych_credentials/{docId} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}

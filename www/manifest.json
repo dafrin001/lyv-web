@@ -1,0 +1,23 @@
+{
+  "name": "Luz y Vida - Apoyo Emocional",
+  "short_name": "Luz y Vida",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0d9488",
+  "description": "Una aplicación segura para el apoyo emocional y prevención del suicidio.",
+  "orientation": "portrait",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2913/2913584.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2913/2913584.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

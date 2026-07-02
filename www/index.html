@@ -1,0 +1,1093 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Luz y Vida - Apoyo Emocional</title>
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" href="assets/logo-final.png">
+    <link rel="apple-touch-icon" href="assets/logo-final.png">
+    <meta name="theme-color" content="#4F46E5">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              teal: {
+                50: "#f0fdfa",
+                100: "#ccfbf1",
+                200: "#99f6e4",
+                500: "#14b8a6",
+                600: "#0d9488",
+                700: "#0f766e",
+                800: "#115e59",
+                900: "#134e4a",
+              },
+              slate: {
+                50: "#f8fafc",
+                100: "#f1f5f9",
+                700: "#334155",
+                800: "#1e293b",
+                900: "#0f172a",
+              },
+              indigo: {
+                50: "#eef2ff",
+                100: "#e0e7ff",
+                500: "#6366f1",
+                600: "#4f46e5",
+                700: "#4338ca",
+                900: "#312e81",
+              },
+              rose: {
+                50: "#fff1f2",
+                100: "#ffe4e6",
+                500: "#f43f5e",
+                900: "#881337",
+              },
+            },
+            fontFamily: {
+              sans: ["Quicksand", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="manifest" href="manifest.json" />
+    <link
+      rel="apple-touch-icon"
+      href="https://cdn-icons-png.flaticon.com/512/2913/2913584.png"
+    />
+    <meta name="theme-color" content="#0d9488" />
+
+    <script>
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("./service-worker.js")
+            .then((reg) => console.log("SW Registered!", reg))
+            .catch((err) => console.log("SW Fail", err));
+        });
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://www.gstatic.com" />
+    <link rel="preconnect" href="https://firestore.googleapis.com" />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Chart.js & jsPDF -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    
+    <style>
+      /* Safe Area Insets for modern phones (notch, gesture nav) */
+      :root {
+        --sat: env(safe-area-inset-top, 0px);
+        --sar: env(safe-area-inset-right, 0px);
+        --sab: env(safe-area-inset-bottom, 0px);
+        --sal: env(safe-area-inset-left, 0px);
+      }
+
+      body {
+        font-family: "Quicksand", sans-serif;
+        -webkit-tap-highlight-color: transparent;
+        /* Prevent content from going under status bar/notch */
+        padding-top: var(--sat);
+        padding-right: var(--sar);
+        padding-bottom: var(--sab);
+        padding-left: var(--sal);
+      }
+
+      .hidden-section {
+        display: none !important;
+      }
+
+      .fade-in {
+        animation: fadeIn 0.3s ease-out;
+      }
+
+      .slide-up {
+        animation: slideUp 0.3s ease-out;
+      }
+
+      .slide-right {
+        animation: slideRight 0.3s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideUp {
+        from {
+          transform: translateY(20px);
+          opacity: 0;
+        }
+
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideRight {
+        from {
+          transform: translateX(20px);
+          opacity: 0;
+        }
+
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      /* RESPONSIVE LAYOUT OPTIMIZATIONS */
+      html,
+      body {
+        /* background-color: #0f172a;  <-- REMOVED to allow Tailwind light/dark classes to work */
+        height: 100%;
+        height: 100dvh; /* Dynamic viewport height for mobile browsers */
+        width: 100%;
+        overflow: hidden;
+        /* Prevent overscroll bounce on iOS */
+        overscroll-behavior: none;
+      }
+
+      #app-frame {
+        height: 100%;
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Desktop specific aesthetic tweaks (Central column max-width) */
+      @media (min-width: 1024px) {
+        #view-login > div,
+        #view-welcome-back > div,
+        #view-home > div,
+        #view-dashboard > div,
+        #view-admin > div,
+        #view-chat > div {
+          max-width: 600px;
+          margin-left: auto;
+          margin-right: auto;
+          width: 100%;
+        }
+
+        /* Chat messages container needs width constraint too but inside flex */
+        #chat-messages {
+          width: 100%;
+          max-width: 800px;
+          margin: 0 auto;
+        }
+      }
+
+      /* Loading Screen */
+      #splash-screen {
+        position: fixed;
+        inset: 0;
+        background-color: #0f172a;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.5s ease-out;
+      }
+
+      /* Hide scrollbar for clean UI */
+      .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+      }
+
+      .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
+
+      .breathing-circle {
+        transition: all 4s ease-in-out;
+      }
+
+      .breathe-expand {
+        transform: scale(1.5);
+        background-color: #99f6e4;
+      }
+
+      .breathe-hold {
+        transform: scale(1.5);
+        background-color: #c7d2fe;
+      }
+
+      .breathe-contract {
+        transform: scale(1);
+        background-color: #f0fdfa;
+      }
+    </style>
+  </head>
+
+  <body
+    class="bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100 transition-colors duration-300"
+  >
+    <!-- SPLASH SCREEN (Immediate Load) -->
+    <div id="splash-screen">
+      <div class="relative mb-6 animate-pulse">
+         <img src="assets/logo-final.png" class="w-32 h-32 object-contain filter drop-shadow-[0_0_30px_rgba(20,184,166,0.4)]" alt="Logo">
+      </div>
+
+      <h1 class="text-white font-bold text-xl tracking-[0.2em]">LUZ Y VIDA</h1>
+      <p
+        class="text-teal-400/80 text-[10px] mt-3 font-bold uppercase tracking-widest"
+      >
+        Cargando...
+      </p>
+    </div>
+
+    <!-- MAIN APP FRAME -->
+    <div
+      id="app-frame"
+      class="w-full bg-slate-50 dark:bg-slate-900 relative flex flex-col h-full overflow-hidden"
+    >
+      <!-- STATUS BAR AREA (Visual Only) -->
+      <div class="h-1 bg-teal-600 dark:bg-teal-800 w-full shrink-0"></div>
+
+      <!-- TOP APP BAR -->
+      <header
+        id="top-bar"
+        class="bg-white dark:bg-slate-950 px-4 py-3 flex items-center justify-between shadow-sm sticky top-0 z-50 shrink-0 hidden-section"
+      >
+        <div class="flex items-center gap-3">
+          <button
+            id="btn-back"
+            onclick="handleBack()"
+            class="p-2 -ml-2 text-slate-400 hover:text-slate-700 dark:hover:text-white hidden-section"
+          >
+            <i data-lucide="arrow-left" class="w-6 h-6"></i>
+          </button>
+          <div>
+            <h1
+              class="text-lg font-bold text-slate-800 dark:text-white leading-none"
+              id="header-title"
+            >
+              Luz y Vida
+            </h1>
+            <p
+              class="text-[10px] text-teal-600 dark:text-teal-400 font-bold uppercase tracking-wider hidden-section"
+              id="header-subtitle"
+            >
+              Inicio
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="toggleTheme()" class="p-2 text-slate-400">
+            <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+            <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- MAIN SCROLLABLE CONTENT -->
+      <main
+        class="flex-1 overflow-y-auto scrollbar-hide relative bg-slate-50 dark:bg-slate-900"
+        id="main-content"
+      >
+        <!-- VISTA: LOGIN (Full Screen - Espacio Seguro Design) -->
+        <section
+          id="view-login"
+          class="min-h-full flex flex-col pt-10 px-6 pb-6 bg-slate-50 dark:bg-[#0B1120] fade-in relative transition-colors duration-300"
+        >
+          <!-- Theme Toggle Absolute -->
+          <button
+            onclick="toggleTheme()"
+            class="absolute top-6 right-6 text-slate-400 hover:text-yellow-400 dark:hover:text-yellow-300 transition-colors"
+          >
+            <i data-lucide="sun" class="w-6 h-6 block dark:hidden"></i>
+            <i data-lucide="moon" class="w-6 h-6 hidden dark:block"></i>
+          </button>
+
+          <div
+            class="flex-1 flex flex-col items-center justify-center w-full max-w-sm mx-auto z-10"
+          >
+            <!-- Logo Section -->
+            <div class="relative mb-6 group flex flex-col items-center">
+               
+              <!-- Logo Container -->
+              <div class="mb-8 relative z-10 animate-float">
+                <div class="w-32 h-32 rounded-3xl bg-transparent flex items-center justify-center">
+                    <img src="assets/logo-final.png" class="w-full h-full object-contain filter drop-shadow-[0_0_20px_rgba(45,212,191,0.3)]" alt="Luz y Vida Logo">
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Header -->
+            <div class="text-center mb-10">
+              <h2
+                class="text-3xl font-bold text-slate-800 dark:text-white mb-2 transition-colors duration-300"
+              >
+                Espacio Seguro
+              </h2>
+              <p
+                class="text-slate-500 dark:text-slate-400 text-sm transition-colors duration-300"
+              >
+                Bienvenido a Luz y Vida. Un lugar para ser escuchado.
+              </p>
+            </div>
+
+            <!-- PATIENT FORM (SMART FLOW) -->
+            <form id="form-auth-flow" class="w-full space-y-5" onsubmit="event.preventDefault(); handleAuthFlow();">
+                
+                <!-- STEP 1: PHONE (Always Visible) -->
+                <div id="step-phone" class="space-y-1.5">
+                    <label class="text-[10px] uppercase font-bold text-slate-500 tracking-wider pl-1">Tu Teléfono Celular</label>
+                    <div class="relative group">
+                        <i data-lucide="phone" class="absolute left-4 top-3.5 text-slate-500 w-5 h-5"></i>
+                        <input type="tel" id="auth-phone" placeholder="Ej. 300 123 4567" required 
+                            class="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-[#162032] border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-1 focus:ring-teal-500 text-slate-900 dark:text-slate-200 outline-none transition-all">
+                    </div>
+                     <p class="text-[10px] text-slate-400 pl-1 mt-1">Ingresa tu número de 10 dígitos (Colombia). Empieza por 3.</p>
+                </div>
+
+                <!-- STEP 2A: PIN ENTRY (For Returning Users - Local Privacy) -->
+                <div id="step-login-pin" class="hidden-section space-y-1.5 slide-enter">
+                     <label class="text-[10px] uppercase font-bold text-teal-600 tracking-wider pl-1">Hola de nuevo. Ingresa tu PIN:</label>
+                    <div class="flex gap-2 justify-center my-4">
+                        <input type="password" id="login-pin" maxlength="4" placeholder="****" 
+                            class="w-32 text-center text-2xl tracking-widest py-3 bg-white dark:bg-[#162032] border-2 border-teal-500 rounded-xl focus:outline-none text-slate-900 dark:text-white">
+                    </div>
+                </div>
+
+                <!-- STEP 2B: REGISTRATION (For New Users) -->
+                <div id="step-register" class="hidden-section space-y-4 slide-enter">
+                    <div class="p-3 bg-teal-50 dark:bg-teal-900/20 rounded-lg text-xs text-teal-800 dark:text-teal-200 mb-2">
+                        👋 Parece que eres nuevo. Completa tus datos para empezar.
+                    </div>
+
+                    <!-- Name -->
+                    <div class="space-y-1">
+                        <label class="text-[10px] uppercase font-bold text-slate-500 pl-1">Nombre o Apodo</label>
+                        <input type="text" id="reg-name" placeholder="¿Cómo te llamamos?" class="w-full px-4 py-3 bg-white dark:bg-[#162032] border border-slate-200 dark:border-slate-800 rounded-xl outline-none focus:border-teal-500 dark:text-white">
+                    </div>
+
+                    <!-- Location -->
+                     <div class="grid grid-cols-2 gap-3">
+                        <div>
+                             <label class="text-[10px] uppercase font-bold text-slate-500 pl-1">Departamento</label>
+                             <select id="reg-dept" onchange="loadMunicipalitiesRegister()" class="w-full px-3 py-3 bg-white dark:bg-[#162032] border border-slate-200 dark:border-slate-800 rounded-xl text-sm outline-none dark:text-slate-300">
+                                 <option value="">Seleccionar...</option>
+                             </select>
+                        </div>
+                        <div>
+                             <label class="text-[10px] uppercase font-bold text-slate-500 pl-1">Municipio</label>
+                             <select id="reg-muni" class="w-full px-3 py-3 bg-white dark:bg-[#162032] border border-slate-200 dark:border-slate-800 rounded-xl text-sm outline-none dark:text-slate-300">
+                                 <option value="">Seleccionar...</option>
+                             </select>
+                        </div>
+                     </div>
+
+                     <!-- Create PIN -->
+                     <div class="space-y-1">
+                        <label class="text-[10px] uppercase font-bold text-slate-500 pl-1">Crea un PIN Secreto (4 dígitos)</label>
+                        <input type="password" id="reg-pin" maxlength="4" placeholder="****" class="w-full px-4 py-3 bg-white dark:bg-[#162032] border border-slate-200 dark:border-slate-800 rounded-xl outline-none focus:border-teal-500 text-center tracking-widest text-lg dark:text-white">
+                        <p class="text-[10px] text-slate-400">Lo usarás para entrar la próxima vez.</p>
+                    </div>
+                </div>
+
+                <!-- ACTION BUTTON -->
+                <button id="btn-auth-action" type="submit" class="w-full py-4 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-bold rounded-xl shadow-lg shadow-teal-500/30 transition-all transform active:scale-[0.98] flex items-center justify-center gap-2">
+                    <span>Continuar</span>
+                    <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                </button>
+
+                 <!-- Loading State -->
+                <div id="auth-loading" class="hidden-section flex justify-center py-4">
+                    <i data-lucide="loader-2" class="w-8 h-8 text-teal-500 animate-spin"></i>
+                </div>
+            </form>
+
+            <!-- PRO FORM (Hidden by default, toggled via footer) -->
+            <form
+              id="form-pro"
+              onsubmit="handleLoginPro(event)"
+              class="w-full space-y-6 hidden-section fade-in"
+            >
+              <div class="flex items-center gap-2 mb-4">
+                <button
+                  type="button"
+                  onclick="toggleProAccess()"
+                  class="p-2 -ml-2 text-slate-400 hover:text-white"
+                >
+                  <i data-lucide="arrow-left"></i>
+                </button>
+                <h3 class="font-bold text-white">Acceso Profesional</h3>
+              </div>
+
+              <div class="space-y-1.5">
+                <label
+                  class="text-[10px] uppercase font-bold text-slate-500 tracking-wider pl-1"
+                  >Código de Acceso</label
+                >
+                <div class="relative group">
+                  <i
+                    data-lucide="key"
+                    class="absolute left-4 top-3.5 text-slate-500 group-focus-within:text-indigo-400 w-5 h-5 transition-colors"
+                  ></i>
+                  <input
+                    type="password"
+                    id="pro-code"
+                    placeholder="Ingrese su código"
+                    required
+                    class="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-[#162032] border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-1 focus:ring-indigo-500 text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 outline-none transition-colors duration-300"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-xl font-bold shadow-lg shadow-indigo-900/50 transition-all"
+              >
+                Acceder al Panel
+              </button>
+            </form>
+          </div>
+
+          <!-- Footer Link -->
+          <div class="mt-8 text-center pb-2 z-10">
+            <button
+              id="btn-toggle-pro"
+              onclick="toggleProAccess()"
+              class="text-xs text-slate-600 hover:text-teal-400 flex items-center justify-center gap-2 mx-auto transition-colors"
+            >
+              <i data-lucide="lock" class="w-3 h-3"></i> Acceso Profesional
+            </button>
+          </div>
+
+          <!-- Background Abstract Elements (Optional for vibe) -->
+          <div
+            class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0"
+          >
+            <div
+              class="absolute top-[-10%] right-[-10%] w-64 h-64 bg-teal-500/5 rounded-full blur-3xl"
+            ></div>
+            <div
+              class="absolute bottom-[-10%] left-[-10%] w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl"
+            ></div>
+          </div>
+        </section>
+
+        <!-- VISTA: WELCOME BACK (Remember Me) -->
+        <section
+          id="view-welcome-back"
+          class="h-full flex flex-col items-center justify-center p-6 hidden-section text-center relative"
+        >
+          <!-- Theme Toggle (Absolute) -->
+          <button
+            onclick="toggleTheme()"
+            class="absolute top-6 right-6 p-2 rounded-full text-slate-400 hover:text-teal-400 hover:bg-slate-800 transition-all"
+          >
+            <i data-lucide="sun" class="w-6 h-6 block dark:hidden"></i>
+            <i data-lucide="moon" class="w-6 h-6 hidden dark:block"></i>
+          </button>
+
+          <div
+            class="w-24 h-24 rounded-full bg-teal-500/10 text-teal-400 flex items-center justify-center mb-6 animate-pulse-slow ring-1 ring-teal-500/20"
+          >
+            <i data-lucide="user" class="w-10 h-10"></i>
+          </div>
+
+          <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-2">
+            Hola de nuevo, <span id="wb-name" class="text-teal-500">User</span>
+          </h2>
+          <p
+            class="text-slate-500 dark:text-slate-400 mb-10 max-w-[200px] mx-auto leading-relaxed"
+          >
+            Tu espacio seguro te está esperando.
+          </p>
+
+          <button
+            onclick="continueSession()"
+            class="w-full max-w-xs py-4 bg-teal-600 hover:bg-teal-500 text-white font-bold rounded-2xl shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40 transition-all transform hover:-translate-y-1 mb-6"
+          >
+            Continuar conversación
+          </button>
+
+          <button
+            onclick="logout()"
+            class="text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline decoration-dashed underline-offset-4 transition-colors"
+          >
+            ¿No eres <span id="wb-name-small">User</span>? Usar otra cuenta
+          </button>
+
+          <div
+            class="mt-auto pt-8 opacity-60 hover:opacity-100 transition-opacity"
+          >
+            <button
+              onclick="handleProSwitchFromWelcome()"
+              class="text-xs text-slate-500 flex items-center gap-2 hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+            >
+              <i data-lucide="lock" class="w-3 h-3"></i> Acceso Profesional
+            </button>
+          </div>
+        </section>
+
+        <!-- VISTA: HOME PACIENTE -->
+        <section
+          id="view-home"
+          class="p-6 space-y-8 pb-32 hidden-section slide-up"
+        >
+          <!-- Welcome Header -->
+          <div>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">
+              Buenos días,
+            </p>
+            <h2
+              id="welcome-msg"
+              class="text-3xl font-bold text-slate-800 dark:text-white"
+            >
+              Hola
+            </h2>
+          </div>
+
+          <!-- Main Actions -->
+          <div class="grid gap-4">
+            <!-- Chat Card -->
+            <div
+              onclick="goToChat()"
+              class="bg-white dark:bg-slate-800 p-6 rounded-[2rem] shadow-sm border border-slate-100 dark:border-slate-800 relative overflow-hidden group cursor-pointer active:scale-95 transition-transform"
+            >
+              <div class="absolute right-0 top-0 p-6 opacity-5 dark:opacity-10">
+                <i data-lucide="message-circle" class="w-32 h-32"></i>
+              </div>
+              <div class="relative z-10 space-y-4">
+                <div
+                  class="w-12 h-12 bg-teal-100 dark:bg-teal-900/50 rounded-2xl flex items-center justify-center text-teal-600 dark:text-teal-400"
+                >
+                  <i data-lucide="message-circle" class="w-6 h-6"></i>
+                </div>
+                <div>
+                  <h3 class="text-xl font-bold text-slate-800 dark:text-white">
+                    Hablar con Esperanza
+                  </h3>
+                  <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                    IA de apoyo emocional 24/7
+                  </p>
+                </div>
+                <div
+                  class="inline-flex items-center gap-2 text-sm font-bold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/30 px-4 py-2 rounded-full"
+                >
+                  Iniciar <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Breath Card -->
+            <div
+              onclick="openBreathingModal()"
+              class="bg-indigo-50 dark:bg-slate-800 p-6 rounded-[2rem] shadow-sm border border-indigo-100 dark:border-slate-800 relative overflow-hidden group cursor-pointer active:scale-95 transition-transform"
+            >
+              <div class="absolute right-0 top-0 p-6 opacity-5 dark:opacity-10">
+                <i data-lucide="wind" class="w-32 h-32"></i>
+              </div>
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/50 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0"
+                >
+                  <i data-lucide="wind" class="w-6 h-6"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-slate-800 dark:text-white">
+                    Respiración 4-7-8
+                  </h3>
+                  <p class="text-xs text-slate-500 dark:text-slate-400">
+                    Ejercicio de 1 min
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Emergency -->
+          <button
+            onclick="toggleSOSModal()"
+            class="w-full bg-rose-50 dark:bg-rose-900/10 text-rose-600 dark:text-rose-400 p-4 rounded-2xl font-bold flex items-center justify-center gap-2 border border-rose-100 dark:border-rose-900/30"
+          >
+            <i data-lucide="phone-call" class="w-5 h-5"></i> SOS
+          </button>
+        </section>
+
+        <!-- VISTA: CHAT (Full Height Mobile Style) -->
+        <section
+          id="view-chat"
+          class="h-full flex flex-col bg-white dark:bg-slate-900 hidden-section slide-right z-20 absolute top-0 left-0 w-full"
+        >
+          <!-- Custom Chat Header -->
+          <div
+            class="bg-white dark:bg-slate-950 p-4 shadow-sm shrink-0 flex items-center gap-3 z-10 border-b dark:border-slate-800"
+          >
+            <button
+              onclick="handleBack()"
+              class="p-2 -ml-2 text-slate-500 dark:text-slate-300"
+            >
+              <i data-lucide="arrow-left"></i>
+            </button>
+            <div
+              class="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center shrink-0"
+            >
+              <i data-lucide="bot" class="w-5 h-5 text-teal-600"></i>
+            </div>
+            <div>
+              <h3
+                class="font-bold text-sm text-slate-800 dark:text-white"
+                id="chat-header-title"
+              >
+                Esperanza AI
+              </h3>
+              <p
+                class="text-[10px] text-teal-500 font-bold flex items-center gap-1"
+                id="chat-header-subtitle"
+              >
+                <span
+                  class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"
+                ></span>
+                En línea
+              </p>
+            </div>
+            <div class="ml-auto">
+              <button onclick="clearChatHistory()" class="p-2 text-slate-400">
+                <i data-lucide="trash-2" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Messages -->
+          <div
+            id="chat-messages"
+            class="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 dark:bg-slate-900"
+          >
+            <!-- Dynamic -->
+          </div>
+
+          <div
+            id="typing-indicator"
+            class="px-6 py-2 text-xs text-slate-400 bg-slate-50 dark:bg-slate-900 hidden-section"
+          >
+            Esperanza está escribiendo...
+          </div>
+
+          <!-- Input Mobile Style -->
+          <div
+            class="p-3 bg-white dark:bg-slate-950 border-t dark:border-slate-800 shrink-0"
+            style="padding-bottom: max(1.5rem, var(--sab))"
+          >
+            <div
+              class="flex items-end gap-2 bg-slate-100 dark:bg-slate-900 p-2 rounded-[1.5rem]"
+            >
+              <input
+                id="chat-input"
+                type="text"
+                class="flex-1 bg-transparent border-none focus:ring-0 text-sm max-h-24 py-3 px-2 resize-none"
+                placeholder="Escribe un mensaje..."
+                autocomplete="off"
+                onkeypress="if (event.key === 'Enter') sendMessage();"
+              />
+              <button
+                onclick="sendMessage()"
+                class="p-3 bg-teal-600 text-white rounded-full shadow-sm hover:scale-105 transition"
+              >
+                <i data-lucide="send" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- VISTA: DASHBOARD -->
+        <section
+          id="view-dashboard"
+          class="p-4 pb-32 space-y-6 hidden-section slide-up"
+        >
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-slate-800 dark:text-white">
+                Mis Pacientes
+              </h2>
+              <p
+                id="pro-jurisdiction"
+                class="text-xs text-slate-500 dark:text-slate-400"
+              ></p>
+            </div>
+            <button
+              onclick="refreshDashboard()"
+              class="p-2 bg-slate-100 dark:bg-slate-800 rounded-full"
+            >
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Stats Cards Horizontal Scroll -->
+          <div class="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+            <div
+              class="min-w-[140px] bg-indigo-500 text-white p-4 rounded-2xl shadow-lg shadow-indigo-200 dark:shadow-none"
+            >
+              <p class="text-3xl font-bold" id="patient-count">0</p>
+              <p class="text-xs opacity-80">Activos</p>
+            </div>
+            <div
+              class="min-w-[140px] bg-white dark:bg-slate-800 p-4 rounded-2xl border dark:border-slate-700"
+            >
+              <p class="text-3xl font-bold text-rose-500" id="risk-count">0</p>
+              <p class="text-xs text-slate-500">En Riesgo</p>
+            </div>
+          </div>
+
+          <!-- List -->
+          <div id="patients-list" class="space-y-3">
+            <!-- Dynamic -->
+          </div>
+        </section>
+
+        <!-- VISTA: ADMIN (Redesigned) -->
+        <section id="view-admin" class="p-4 space-y-6 hidden-section pb-32">
+          <!-- Header -->
+          <div class="flex items-center gap-3 mb-6">
+            <div
+              class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/30"
+            >
+              <i data-lucide="shield-check" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h2 class="font-bold text-xl text-slate-800 dark:text-white">
+                Panel de Administrador
+              </h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400">
+                Control total del sistema
+              </p>
+            </div>
+          </div>
+
+          <!-- 1. Seguridad del Sistema -->
+          <div
+            class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700"
+          >
+            <div
+              class="flex items-center gap-2 mb-4 text-slate-700 dark:text-slate-200"
+            >
+              <i data-lucide="lock" class="w-4 h-4"></i>
+              <h3 class="font-bold text-sm">Seguridad del Sistema</h3>
+            </div>
+
+            <div class="space-y-1">
+              <label
+                class="text-[10px] uppercase font-bold text-slate-500 tracking-wider pl-1"
+                >Actualizar Clave Maestra</label
+              >
+              <div class="flex gap-2">
+                <input
+                  id="admin-new-key"
+                  type="text"
+                  placeholder="Nueva contraseña segura"
+                  class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none dark:text-white transition-all"
+                />
+                <button
+                  onclick="updateAdminKey()"
+                  class="bg-indigo-600 hover:bg-indigo-500 text-white px-4 rounded-xl font-bold text-xs transition-colors shadow-lg shadow-indigo-900/20"
+                >
+                  Actualizar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Registrar Nuevo Profesional -->
+          <div
+            class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700"
+          >
+            <div
+              class="flex items-center gap-2 mb-4 text-slate-700 dark:text-slate-200"
+            >
+              <i data-lucide="user-plus" class="w-4 h-4 text-teal-500"></i>
+              <h3 class="font-bold text-sm">Registrar Nuevo Profesional</h3>
+            </div>
+
+            <form onsubmit="handleCreatePro(event)" class="space-y-4">
+              <div class="space-y-1">
+                <label
+                  class="text-[10px] uppercase font-bold text-slate-500 tracking-wider pl-1"
+                  >Nombre del Especialista</label
+                >
+                <div class="relative">
+                  <i
+                    data-lucide="user"
+                    class="absolute left-3 top-3.5 text-slate-400 w-4 h-4"
+                  ></i>
+                  <input
+                    id="new-pro-name"
+                    placeholder="Ej. Dra. Ana Martínez"
+                    required
+                    class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-teal-500 outline-none dark:text-white transition-all"
+                  />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 gap-4">
+                <div class="space-y-1">
+                  <label
+                    class="text-[10px] uppercase font-bold text-slate-500 tracking-wider pl-1"
+                    >Jurisdicción: Departamento</label
+                  >
+                  <select
+                    id="new-pro-dept"
+                    onchange="
+                      loadMunicipalities('new-pro-dept', 'new-pro-muni')
+                    "
+                    required
+                    class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500 dark:text-white"
+                  >
+                    <option value="">Seleccionar...</option>
+                  </select>
+                </div>
+                <div class="space-y-1">
+                  <label
+                    class="text-[10px] uppercase font-bold text-slate-500 tracking-wider pl-1"
+                    >Jurisdicción: Municipio</label
+                  >
+                  <select
+                    id="new-pro-muni"
+                    required
+                    class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-teal-500 dark:text-white"
+                  >
+                    <option value="">Seleccionar...</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="pt-2">
+                <button
+                  type="submit"
+                  class="w-full bg-teal-600 hover:bg-teal-500 text-white py-3.5 rounded-xl font-bold text-sm shadow-lg shadow-teal-900/20 flex items-center justify-center gap-2 transition-transform active:scale-[0.98]"
+                >
+                  <i data-lucide="key" class="w-4 h-4"></i> Generar Acceso
+                </button>
+                <p class="text-[10px] text-slate-400 text-center mt-2">
+                  El profesional solo podrá ver pacientes de este Municipio.
+                </p>
+              </div>
+            </form>
+          </div>
+
+          <!-- 3. Profesionales Activos -->
+          <div class="space-y-3">
+            <h3
+              class="font-bold text-sm text-slate-500 uppercase tracking-wider pl-1 flex items-center gap-2"
+            >
+              <i data-lucide="users" class="w-4 h-4"></i> Profesionales Activos
+              <span
+                id="pro-count-badge"
+                class="ml-1 bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded text-[10px]"
+                >(0)</span
+              >
+            </h3>
+            <div id="admin-pro-list" class="space-y-2">
+              <!-- Dynamic List -->
+            </div>
+          </div>
+
+          <!-- 4. Danger Zone -->
+          <div
+            class="bg-rose-50 dark:bg-rose-900/10 p-5 rounded-2xl border border-rose-100 dark:border-rose-900/30"
+          >
+            <div
+              class="flex items-center gap-2 mb-2 text-rose-600 dark:text-rose-400"
+            >
+              <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+              <h3 class="font-bold text-sm">
+                Gestión de Datos (Zona de Peligro)
+              </h3>
+            </div>
+            <p class="text-xs text-rose-600/70 dark:text-rose-400/70 mb-4">
+              Zona de mantenimiento de la base de datos. Usa estas opciones con
+              extrema precaución.
+            </p>
+
+            <button
+              onclick="handleWipeDB()"
+              class="w-full bg-white dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 p-3 rounded-xl font-bold text-xs border border-rose-200 dark:border-rose-900/50 flex items-center justify-center gap-2 hover:bg-rose-50 transition-colors"
+            >
+              <i data-lucide="trash-2" class="w-4 h-4"></i> Eliminar TODAS las
+              conversaciones
+            </button>
+            <p class="text-[10px] text-center mt-2 text-rose-400">
+              RESTABLECIMIENTO DE FÁBRICA
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <!-- BOTTOM NAVIGATION BAR (Android/iOS Style) -->
+      <nav
+        id="bottom-nav"
+        class="bg-white dark:bg-slate-950 border-t dark:border-slate-800 px-6 pt-3 flex justify-between items-center shrink-0 hidden-section sticky bottom-0 z-40"
+        style="
+          padding-bottom: max(0.75rem, var(--sab));
+          padding-left: max(1.5rem, var(--sal));
+          padding-right: max(1.5rem, var(--sar));
+        "
+      >
+        <button
+          onclick="
+            navigateTo(
+              currentUser.role === 'patient'
+                ? 'view-home'
+                : currentUser.role === 'admin'
+                  ? 'view-admin'
+                  : 'view-dashboard',
+            )
+          "
+          class="flex flex-col items-center gap-1 text-teal-600 dark:text-teal-400"
+        >
+          <i data-lucide="home" class="w-6 h-6"></i>
+          <span class="text-[10px] font-bold">Inicio</span>
+        </button>
+
+        <!-- Central Action Button -->
+        <button
+          onclick="if (currentUser.role === 'patient') goToChat();"
+          class="w-14 h-14 bg-teal-600 rounded-full flex items-center justify-center text-white -mt-8 shadow-lg shadow-teal-200 dark:shadow-teal-900/50 hover:scale-110 transition border-4 border-slate-50 dark:border-slate-900"
+        >
+          <i data-lucide="message-circle" class="w-6 h-6"></i>
+        </button>
+
+        <button
+          onclick="logout()"
+          class="flex flex-col items-center gap-1 text-slate-400 hover:text-rose-500"
+        >
+          <i data-lucide="user" class="w-6 h-6"></i>
+          <span class="text-[10px] font-bold">Salir</span>
+        </button>
+      </nav>
+
+      <!-- MODALS (Full Screen Overlay Style) -->
+      <div
+        id="modal-breathing"
+        class="absolute inset-0 z-50 bg-slate-900/95 flex flex-col items-center justify-center text-white hidden-section p-8 text-center fade-in"
+      >
+        <button
+          onclick="closeBreathingModal()"
+          class="absolute top-8 right-8 p-2 bg-white/10 rounded-full"
+        >
+          <i data-lucide="x"></i>
+        </button>
+        <h3 class="text-2xl font-bold mb-8">Relájate</h3>
+        <div class="relative w-64 h-64 flex items-center justify-center mb-12">
+          <div
+            id="breath-circle-1"
+            class="absolute w-56 h-56 bg-teal-500/30 rounded-full breathing-circle"
+          ></div>
+          <div
+            id="breath-circle-2"
+            class="absolute w-40 h-40 bg-teal-400/50 rounded-full breathing-circle"
+          ></div>
+          <div class="relative z-10 text-6xl font-bold" id="breath-counter">
+            4
+          </div>
+        </div>
+        <p id="breath-instruction" class="text-xl font-medium tracking-wide">
+          Inhala...
+        </p>
+        <button
+          id="btn-start-breath"
+          onclick="startBreathCycle()"
+          class="mt-8 px-8 py-3 bg-teal-600 rounded-full font-bold"
+        >
+          Iniciar
+        </button>
+      </div>
+
+      <div
+        id="modal-sos"
+        class="absolute inset-0 z-50 bg-rose-600 flex flex-col items-center justify-center p-8 text-white hidden-section slide-up"
+      >
+        <h2 class="text-4xl font-bold mb-8">AYUDA</h2>
+        <div class="grid gap-4 w-full">
+          <a
+            href="tel:123"
+            class="bg-white/20 p-6 rounded-2xl flex items-center justify-between hover:bg-white/30 backdrop-blur-sm"
+          >
+            <span class="text-xl font-bold">Llamar 123</span>
+            <i data-lucide="phone" class="w-6 h-6"></i>
+          </a>
+          <a
+            href="tel:106"
+            class="bg-white/20 p-6 rounded-2xl flex items-center justify-between hover:bg-white/30 backdrop-blur-sm"
+          >
+            <span class="text-xl font-bold">Llamar 106</span>
+            <i data-lucide="heart" class="w-6 h-6"></i>
+          </a>
+        </div>
+        <button
+          onclick="toggleSOSModal()"
+          class="mt-12 text-white/70 font-bold uppercase tracking-widest text-sm"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="colombia-data.js"></script>
+    <script type="module" src="app.js?v=1.8"></script>
+    <script>
+      // Init Icons
+      // lucide.createIcons(); // Called in app.js now
+
+      // FAILSAFE: Force hide splash screen after 3.5s if app.js fails
+      setTimeout(() => {
+          const s = document.getElementById('splash-screen');
+          if(s && !s.classList.contains('hidden-section') && !s.classList.contains('opacity-0')) {
+              console.warn("Splash screen force hidden by failsafe");
+              s.style.display = 'none';
+          }
+      }, 3500);
+
+      // Custom Layout JS
+      function handleBack() {
+        const chatView = document.getElementById("view-chat");
+        if (
+          !chatView.classList.contains("hidden-section") &&
+          currentUser.role === "patient"
+        ) {
+          // If in chat as patient, go home
+          window.navigateTo("view-home");
+        } else {
+          // Default
+          window.navigateTo(
+            currentUser.role === "patient" ? "view-home" : "view-dashboard",
+          );
+        }
+      }
+    </script>
+  </body>
+</html>
